@@ -1,4 +1,4 @@
-border-1px($color){
+@mixin border-1px($color){
   position: relative;
   &::after{
     display: block;
