@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <v-header></v-header>
-    <div class="tab">
+    <div class="tab border-1px">
       <div class="tab-item">
         <router-link to="/goods">商品</router-link>
       </div>
@@ -19,8 +19,25 @@
 <script>
   import header from '@/components/header/header'
 
+  //定义数据获取成功状态码，方便更改
+  const ERR_OK = 0;
+
   export default {
     name: 'App',
+    data() {
+      return {
+        seller: {}
+      }
+    },
+    //生命周期钩子
+    created() {
+      this.$http.get('/api/seller').then((response) => {
+        response = response.body;  //获取数据对象
+        if (response.errno === ERR_OK) {
+          this.seller = response.data;
+        }
+      })
+    },
     components: {
       'v-header': header
     }
@@ -28,23 +45,24 @@
 </script>
 
 <style lang="scss" type="text/scss" scoped>
-  /*@import "./common/scss/mixins";  //引入mixins.scss*/
+  @import "./common/scss/mixins";
+  //引入mixins.scss
+  @import "./common/scss/base"; //引入base.scss
 
-  .tab{
+  .tab {
     display: flex;
     width: 100%;
     height: 40px;
     line-height: 40px;
-    border-bottom: 1px solid rgba(7,17,27,.1);
-    /*border-1px(rgba(7,17,27,0.1));*/
-    .tab-item{
+    @include border-1px(rgba(7, 17, 27, 0.1)); //引入混合样式
+    .tab-item {
       flex: 1;
       text-align: center;
-      a{
+      a {
         display: block;
         font-size: 14px;
-        &.active{
-          color: rgb(240,20,20);
+        &.active {
+          color: rgb(240, 20, 20);
         }
       }
     }

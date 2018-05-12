@@ -4,7 +4,11 @@
 
 <script>
   export default {
-    name: ""
+    props: {
+      seller: {
+        type: Object
+      }
+    }
   }
 </script>
 

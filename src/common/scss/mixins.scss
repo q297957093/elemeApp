@@ -1,11 +1,15 @@
-border-1px($color){
+//定义1px边框的混合指令
+//传入颜色作为参数
+@mixin border-1px($color){
+  //利用伪元素定位产生边框，再利用base.scss内的.border-1px 类名进行缩放
   position: relative;
   &::after{
     display: block;
     position: absolute;
+    width: 100%;
     left: 0;
     bottom: 0;
     border-top: 1px solid $color;
-    content: '';
+    content: ' ';
   }
 }
