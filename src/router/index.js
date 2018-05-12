@@ -7,6 +7,7 @@ import seller from '@/components/seller/seller'
 Vue.use(Router);
 
 export default new Router({
+  linkActiveClass: 'active',  //指定被选中的路由的类名
   routes: [
     {
       path: '/',

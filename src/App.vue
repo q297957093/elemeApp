@@ -27,16 +27,25 @@
   }
 </script>
 
-<style lang="scss" type="text/scss">
-  $icolor:red;
+<style lang="scss" type="text/scss" scoped>
+  @import "./common/scss/mixins";  //引入mixins.scss
+
   .tab{
-    background-color: $icolor;
     display: flex;
     width: 100%;
     height: 40px;
+    line-height: 40px;
+    border-1px(rgba(7,17,27,0.1));
     .tab-item{
       flex: 1;
       text-align: center;
+      a{
+        display: block;
+        font-size: 14px;
+        &.active{
+          color: rgb(240,20,20);
+        }
+      }
     }
   }
 </style>
