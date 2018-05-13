@@ -1,0 +1,5 @@
+//再入口文件中统一引入scss包
+//尤其是icon 必须在此就引入，否则按照渲染顺序会报错
+@import "icon";
+@import "base";
+@import "mixin";

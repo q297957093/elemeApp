@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <v-header></v-header>
+    <!--给header组件传递seller数据-->
+    <v-header :seller="seller"></v-header>
     <div class="tab border-1px">
       <div class="tab-item">
         <router-link to="/goods">商品</router-link>
@@ -35,6 +36,7 @@
         response = response.body;  //获取数据对象
         if (response.errno === ERR_OK) {
           this.seller = response.data;
+
         }
       })
     },
@@ -45,9 +47,7 @@
 </script>
 
 <style lang="scss" type="text/scss" scoped>
-  @import "./common/scss/mixins";
-  //引入mixins.scss
-  @import "./common/scss/base"; //引入base.scss
+  @import "./common/scss/mixin"; //引入mixin.scss
 
   .tab {
     display: flex;

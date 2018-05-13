@@ -1,6 +1,6 @@
 {
   "seller": {
-    "name": "粥品香坊（回龙观）",
+    "name": "夜来粥道（深大店）",
     "description": "蜂鸟专送",
     "deliveryTime": 38,
     "score": 4.2,
@@ -15,7 +15,7 @@
     "supports": [
       {
         "type": 0,
-        "description": "在线支付满28减5"
+        "description": "满4减4，满27减20"
       },
       {
         "type": 1,

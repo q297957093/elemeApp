@@ -1,0 +1,24 @@
+//定义1px边框的混合指令
+//参数：颜色
+@mixin border-1px($color) {
+  //利用伪元素定位产生边框，再利用base.scss内的.border-1px 类名进行缩放
+  position: relative;
+  &::after {
+    display: block;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    border-top: 1px solid $color;
+    content: ' ';
+  }
+}
+
+//定义不同视网膜屏的背景图混合指令
+//参数：@nx.png前的路径
+@mixin bg-image($url) {
+  background-image: url($url + "@2x.png");
+  @media (-webkit-min-device-pixel-ratio: 3),(min-device-pixel-ratio: 3) {
+    background-image: url($url + "@3x.png");
+  }
+}
