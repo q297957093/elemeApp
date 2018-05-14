@@ -1,3 +1,14 @@
+//清除浮动
+.clearfix {
+  zoom: 1;
+  &::before, &::after {
+    display: table;
+    content: " ";
+  }
+  &::after {
+    clear: both;
+  }
+}
 
 //给不同视网膜屏进行缩放，实现1px像素
 @media (-webkit-min-device-pixel-ratio: 1.5), (min-device-pixel-ratio: 1.5) {

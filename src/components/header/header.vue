@@ -45,17 +45,31 @@
     <div v-show="detailShow" class="detail-float">
       <!--使用sticky footer布局-->
       <div class="detail-wrapper clearfix">
-        <div class="title"></div>
-        <div class="msg"></div>
-        <div class="bulletin"></div>
+        <div class="detail-main">
+          <!--h1标签更符合语义-->
+          <h1 class="name">{{seller.name}}</h1>
+          <!--给星星组件包起来写样式，避免影响组件复用-->
+          <div class="star-wrapper">
+            <!--星星评价组件，传入星星尺寸和评分-->
+            <star :size="48" :score="seller.score"></star>
+          </div>
+        </div>
       </div>
-      <div class="close"></div>
+      <div class="close" @click="closeDetail">
+        <i class="icon-close"></i>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+  import star from '../star/star';  //引入star组件
+
   export default {
+    //注册star组件
+    components: {
+      star
+    },
     //接收App传进来的参数
     props: {
       seller: {
@@ -70,6 +84,9 @@
     methods: {
       showDetail() {
         this.detailShow = true;  //改变显示标记方法
+      },
+      closeDetail() {
+        this.detailShow = false;  //关闭详情浮层
       }
     },
     created() {
@@ -234,6 +251,32 @@
       height: 100%;
       top: 0;
       background-color: rgba(7, 17, 27, .8);
+      overflow: auto;
+      .detail-wrapper {
+        min-height: 100%; //保证最小高度，使关闭按钮在底部
+        .detail-main {
+          margin-top: 64px;
+          padding-bottom: 64px; //给底部关闭按钮空出位置
+          .name {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 16px;
+          }
+          .star-wrapper {
+            margin: 16px 0 28px 0;
+            padding: 2px 0;
+            text-align: center;
+          }
+        }
+      }
+      .close {
+        width: 32px;
+        height: 32px;
+        margin: -64px auto 0 auto;
+        font-size: 32px;
+        color: rgba(255, 255, 255, .5);
+      }
     }
 
   }
