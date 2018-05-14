@@ -25,16 +25,31 @@
         </div>
       </div>
       <!--更多活动support-->
-      <div class="support-count" v-if="seller.supports">
+      <div class="support-count" v-if="seller.supports" @click="showDetail">
         <span class="count">{{seller.supports.length}}个</span>
         <!--图标字体 右箭头-->
         <i class="icon-keyboard_arrow_right"></i>
       </div>
     </div>
     <!--公告部分-->
-    <div class="bulletin">
-      <span class="icon"></span>
-      <span class="text">{{seller.bulletin}}</span>
+    <div class="bulletin" @click="showDetail">
+      <!--为避免中间空隙，紧挨两个span，font-size:0会把省略号消除-->
+      <span class="icon"></span><span class="text">{{seller.bulletin}}</span>
+      <i class="icon-keyboard_arrow_right"></i>
+    </div>
+    <!--模糊背景图-->
+    <div class="background">
+      <img :src="seller.avatar" width="100%" height="100%">
+    </div>
+    <!--详情浮层-->
+    <div v-show="detailShow" class="detail-float">
+      <!--使用sticky footer布局-->
+      <div class="detail-wrapper clearfix">
+        <div class="title"></div>
+        <div class="msg"></div>
+        <div class="bulletin"></div>
+      </div>
+      <div class="close"></div>
     </div>
   </div>
 </template>
@@ -45,6 +60,16 @@
     props: {
       seller: {
         type: Object
+      }
+    },
+    data() {
+      return {
+        detailShow: false   //详情浮层显示标记
+      };
+    },
+    methods: {
+      showDetail() {
+        this.detailShow = true;  //改变显示标记方法
       }
     },
     created() {
@@ -60,10 +85,11 @@
   @import "../../common/scss/mixin"; //引入mixin.scss
 
   .header {
+    position: relative;
     background-color: rgba(7, 17, 25, .5);
     color: #ffffff;
-    /*滤镜毛玻璃效果*/
-    /*filter: blur(10px);*/
+    overflow: hidden; //去除模糊背景多余
+    /*头部内容*/
     .header-content {
       position: relative;
       padding: 24px 12px 18px 24px;
@@ -140,26 +166,74 @@
           }
         }
       }
-      .support-count{
+      .support-count {
         position: absolute;
         right: 12px;
         bottom: 14px;
         padding: 0 8px;
         height: 24px;
-        line-height: 24px;
-        background-color: rgba(0,0,0,.2);
+        background-color: rgba(0, 0, 0, .2);
         border-radius: 12px;
         text-align: center;
-        .count{
+        .count {
           font-size: 10px;
-          vertical-align: top;
         }
-        .icon-keyboard_arrow_right{
-          font-size: 12px;
+        .icon-keyboard_arrow_right {
+          font-size: 10px;
           margin-left: 2px;
           line-height: 24px;
         }
       }
+    }
+    /*公告部分*/
+    .bulletin {
+      position: relative;
+      height: 28px;
+      padding: 0 22px 0 12px;
+      background-color: rgba(7, 17, 27, .2);
+      white-space: nowrap; //规定段落中的文字不进行换行
+      overflow: hidden; //修剪超出文本
+      text-overflow: ellipsis; //显示省略符号来代表被修剪的文本
+      .icon {
+        display: inline-block;
+        width: 22px;
+        height: 12px;
+        @include bg-image('bulletin');
+        background-size: 22px 12px;
+        background-repeat: no-repeat;
+        vertical-align: top;
+        margin-top: 8px;
+      }
+      .text {
+        margin: 0 4px;
+        font-size: 10px;
+        line-height: 30px;
+      }
+      i {
+        position: absolute;
+        right: 10px;
+        bottom: 9px;
+        font-size: 10px;
+      }
+    }
+    /*模糊背景*/
+    .background {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      filter: blur(10px); //滤镜毛玻璃效果
+      z-index: -1; //降低层级
+    }
+    /*详情浮层*/
+    .detail-float {
+      position: fixed; //固定定位
+      z-index: 100;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      background-color: rgba(7, 17, 27, .8);
     }
 
   }
