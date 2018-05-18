@@ -33,10 +33,9 @@
     //生命周期钩子
     created() {
       this.$http.get('/api/seller').then((response) => {
-        response = response.body;  //获取数据对象
-        if (response.errno === ERR_OK) {
+        response = response.data;   //获取data内的数据
+        if (response.errno === ERR_OK) {   //判断错误码
           this.seller = response.data;
-
         }
       })
     },

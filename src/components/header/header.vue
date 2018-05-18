@@ -42,23 +42,48 @@
       <img :src="seller.avatar" width="100%" height="100%">
     </div>
     <!--详情浮层-->
-    <div v-show="detailShow" class="detail-float">
-      <!--使用sticky footer布局-->
-      <div class="detail-wrapper clearfix">
-        <div class="detail-main">
-          <!--h1标签更符合语义-->
-          <h1 class="name">{{seller.name}}</h1>
-          <!--给星星组件包起来写样式，避免影响组件复用-->
-          <div class="star-wrapper">
-            <!--星星评价组件，传入星星尺寸和评分-->
-            <star :size="48" :score="seller.score"></star>
+    <!--添加过渡-->
+    <transition name="fade">
+      <div v-show="detailShow" class="detail-float">
+        <!--使用sticky footer布局-->
+        <div class="detail-wrapper clearfix">
+          <div class="detail-main">
+            <!--h1标签更符合语义-->
+            <h1 class="name">{{seller.name}}</h1>
+            <!--给星星组件包起来写样式，避免影响组件复用-->
+            <div class="star-wrapper">
+              <!--星星评价组件，传入星星尺寸和评分-->
+              <star :size="48" :score="seller.score"></star>
+            </div>
+            <!--优惠信息-->
+            <div class="title">
+              <div class="line border-1px"></div>
+              <div class="text">优惠信息</div>
+              <div class="line border-1px"></div>
+            </div>
+            <!--语义化用ul-->
+            <ul v-if="seller.supports" class="supports">
+              <li v-for="(item,index) in seller.supports" class="support-item">
+                <span class="icon" :class="classMap[seller.supports[index].type]"></span>
+                <span class="text">{{seller.supports[index].description}}</span>
+              </li>
+            </ul>
+            <!--商家公告-->
+            <div class="title">
+              <div class="line border-1px"></div>
+              <div class="text">商家公告</div>
+              <div class="line border-1px"></div>
+            </div>
+            <div class="bulletin-detail">
+              <p class="content">{{seller.bulletin}}</p>
+            </div>
           </div>
         </div>
+        <div class="close" @click="closeDetail">
+          <i class="icon-close"></i>
+        </div>
       </div>
-      <div class="close" @click="closeDetail">
-        <i class="icon-close"></i>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -94,8 +119,6 @@
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
     }
   };
-
-  // console.log(seller);
 </script>
 
 <style lang="scss" type="text/scss" scoped>
@@ -250,8 +273,16 @@
       width: 100%;
       height: 100%;
       top: 0;
-      background-color: rgba(7, 17, 27, .8);
       overflow: auto;
+      background-color: rgba(7, 17, 27, .8);
+      -webkit-backdrop-filter: blur(10px);  //底层背景模糊，仅支持ios
+      &.fade-enter-active, &.fade-leave-active {
+        transition: all 0.5s;   //用来定义过渡过程时间的类名
+      }
+      &.fade-enter, &.fade-leave-to {
+        opacity: 0;         //定义过渡开始和过渡结束状态
+        background-color: rgba(7, 17, 27, 0);
+      }
       .detail-wrapper {
         min-height: 100%; //保证最小高度，使关闭按钮在底部
         .detail-main {
@@ -264,9 +295,74 @@
             line-height: 16px;
           }
           .star-wrapper {
-            margin: 16px 0 28px 0;
+            margin-top: 16px;
             padding: 2px 0;
             text-align: center;
+          }
+          .title {
+            display: flex; //自适应弹性布局
+            width: 80%;
+            margin: 28px auto 24px auto;
+            .line {
+              flex: 1;
+              top: -6px;
+              @include border-1px(rgba(255, 255, 255, .2));
+            }
+            .text {
+              margin: 0 12px;
+              font-size: 14px;
+              font-weight: 700;
+            }
+          }
+          .supports {
+            width: 80%;
+            margin: 0 auto;
+            .support-item {
+              padding: 0 12px;
+              margin-bottom: 12px;
+              &:last-child {
+                margin-bottom: 0;
+              }
+              .icon {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                margin-right: 6px;
+                vertical-align: middle;
+                /*图标大小和之前有所区别，选择第2种图片*/
+                &.decrease {
+                  @include bg-image('decrease_2');
+                }
+                &.discount {
+                  @include bg-image('discount_2');
+                }
+                &.guarantee {
+                  @include bg-image('guarantee_2');
+                }
+                &.invoice {
+                  @include bg-image('invoice_2');
+                }
+                &.special {
+                  @include bg-image('special_2');
+                }
+                background-size: 16px 16px;
+                background-repeat: no-repeat;
+              }
+              .text {
+                font-size: 12px;
+                line-height: 16px;
+              }
+            }
+          }
+          .bulletin-detail {
+            width: 80%;
+            margin: 0 auto;
+            .content {
+              padding: 0 12px;
+              font-size: 12px;
+              line-height: 24px;
+              text-align: justify; //文字两端对齐
+            }
           }
         }
       }
