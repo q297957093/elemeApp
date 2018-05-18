@@ -13,6 +13,12 @@
     content: ' ';
   }
 }
+//定义去除1px边框的指令
+@mixin border-none(){
+  &::after{
+    display: none;
+  }
+}
 
 //定义不同视网膜屏的背景图混合指令
 //参数：@nx.png前的路径
