@@ -13,7 +13,8 @@
         <router-link to="/seller">商家</router-link>
       </div>
     </div>
-    <router-view/>
+    <!--路由视图,需要传递seller数据，方便内部组件使用-->
+    <router-view :seller="seller"></router-view>
   </div>
 </template>
 

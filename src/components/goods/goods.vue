@@ -3,7 +3,8 @@
     <!--左侧菜单-->
     <div class="menu-wrapper border-1px" ref="menuWrapper">
       <ul>
-        <li v-for="item in goods" class="menu-item">
+        <li v-for="(item,index) in goods" class="menu-item" ref="menuList"
+            :class="{'current':currentIndex===index}" @click="selectMenu(index)">
           <span class="text">
             <span v-if="item.type>0" class="icon" :class="classMap[item.type]"></span>{{item.name}}
           </span>
@@ -14,7 +15,7 @@
     <div class="foods-wrapper" ref="foodsWrapper">
       <ul>
         <!--菜品分类-->
-        <li v-for="item in goods" class="food-item">
+        <li v-for="item in goods" class="food-item" ref="foodList">
           <!--分类标题-->
           <h1 class="title">{{item.name}}</h1>
           <ul>
@@ -39,27 +40,70 @@
                   <span class="now-price">￥{{food.price}}</span><span v-if="food.oldPrice" class="old-price">￥{{food.oldPrice}}</span>
                 </div>
               </div>
+              <!--加减商品组件-->
+              <div class="cartcontrol-wrapper">
+                <cartcontrol :food="food"></cartcontrol>
+              </div>
             </li>
           </ul>
         </li>
       </ul>
     </div>
+    <!--购物车组件,需要传入seller配送费和起送价,传入被选择的食物-->
+    <shopcart :sendFee="seller.deliveryPrice" :minPrice="seller.minPrice"
+              :selectFoods="selectFoods"></shopcart>
   </div>
 </template>
 
 <script>
   import BScroll from 'better-scroll';   //引入better-scroll滚动条插件
+  import shopcart from '../shopcart/shopcart';  //引入购物车组件
+  import cartcontrol from '../cartcontrol/cartcontrol';  //引入加减商品组件
 
-  const ERR_OK = 0;
+  const ERR_OK = 0;  //初始化错误码常量
   export default {
+    components: {
+      shopcart,  //注册购物车组件
+      cartcontrol  //注册加减商品组件
+    },
     props: {
       seller: {
-        type: Object
+        type: Object  //接收App传进来的seller数据
       }
     },
     data() {
       return {
-        goods: []
+        goods: [],   //获取数据
+        listHeight: [],  //右侧食物列表高度数组
+        scrollY: 0  //右侧滚动条Y轴位置
+      }
+    },
+    computed: {
+      //计算左侧menu索引值对应的右侧食物列表高度
+      currentIndex() {
+        for (let i = 0; i < this.listHeight.length; i++) {
+          //获取高度区间范围
+          let height1 = this.listHeight[i];
+          let height2 = this.listHeight[i + 1];
+          //判断在高度区间内
+          if (!height2 || (this.scrollY >= height1 && this.scrollY < height2)) {
+            this._followScroll(i);   //调用滚动左侧menu
+            return i;
+          }
+        }
+        return 0;
+      },
+      //根据food的count属性，获取被选择的食物，并放入数组
+      selectFoods() {
+        let foods = [];
+        this.goods.forEach((good) => {
+          good.foods.forEach((food) => {
+            if (food.count) {
+              foods.push(food);
+            }
+          })
+        });
+        return foods;
       }
     },
     created() {
@@ -74,6 +118,7 @@
           //修改数据后使用nextTick，dom更新循环后执行延迟回调，则可以在回调中获取更新后的DOM
           this.$nextTick(() => {
             this._initScroll();
+            this._calculateH();
           });
         }
       });
@@ -82,11 +127,41 @@
       //初始化滚动方法
       _initScroll() {
         this.menuScroll = new BScroll(this.$refs.menuWrapper, {
-          click: true
+          click: true  //BScroll默认会阻止浏览器的原生click事件, 需设置为true
         });
         this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
-          click: true
+          click: true,
+          probeType: 3  //有时候我们需要知道滚动的位置，需设置为3，实时派发 scroll 事件
         });
+        //监听滚动事件，获取Y轴滚动值
+        this.foodsScroll.on('scroll', (pos) => {
+          // 判断滑动方向，避免下拉时分类高亮错误（如第一分类商品数量为1时，下拉使得第二分类高亮）
+          if (pos.y <= 0) {
+            this.scrollY = Math.abs(Math.round(pos.y));  //取整取绝对值
+          }
+        });
+      },
+      //计算食物列表高度，对应左侧menu
+      _calculateH() {
+        let foodList = this.$refs.foodList;  //获取dom元素
+        let height = 0;  //初始化临时变量
+        this.listHeight.push(height);
+        for (let i = 0; i < foodList.length; i++) {
+          height += foodList[i].clientHeight;   //递增每一个食物列表的高度
+          this.listHeight.push(height);   //将高度push进数组
+        }
+      },
+      //选择左侧menu，滚动到相对应的食物列表
+      selectMenu(index) {
+        let foodList = this.$refs.foodList;  //获取所有食物列表dom元素
+        let el = foodList[index];   //获取选择索引对应的食物列表dom元素
+        this.foodsScroll.scrollToElement(el, 300)  //滚动到指定的目标元素,滚动动画的时长
+      },
+      //滚动右侧食物列表，相对应的左侧menu跟随滚动，可避免左侧menu过长看不见的问题
+      _followScroll(index) {
+        let menuList = this.$refs.menuList;
+        let el = menuList[index];
+        this.menuScroll.scrollToElement(el, 300, 0, -100);  //相对于目标元素的纵轴偏移量
       }
     }
   }
@@ -113,6 +188,17 @@
         padding: 0 12px;
         line-height: 14px;
         @include border-1px(rgba(7, 17, 27, .1));
+        &.current {
+          /*对应右侧食物列表高亮menu*/
+          position: relative;
+          z-index: 10;
+          background-color: #fff;
+          margin-top: -1px; //遮盖上一元素的border
+          @include border-none(); //取消该高亮元素的border
+          .text {
+            font-weight: 700;
+          }
+        }
         .icon {
           display: inline-block;
           width: 12px;
@@ -143,6 +229,7 @@
           width: 56px;
           font-size: 12px;
           vertical-align: middle;
+          font-weight: 200;
         }
       }
     }
@@ -163,7 +250,7 @@
         padding-bottom: 18px;
         @include border-1px(rgba(7, 17, 27, .1));
         &:last-child {
-          @include border-none();   //去除最后一个元素的边框
+          @include border-none(); //去除最后一个元素的边框
           margin-bottom: 0;
         }
         .icon {
@@ -203,6 +290,12 @@
               text-decoration: line-through; //删除线
             }
           }
+
+        }
+        .cartcontrol-wrapper {
+          position: absolute;
+          bottom: 12px;
+          right: 0;
         }
       }
     }
