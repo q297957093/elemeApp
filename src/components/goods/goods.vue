@@ -42,7 +42,8 @@
               </div>
               <!--加减商品组件-->
               <div class="cartcontrol-wrapper">
-                <cartcontrol :food="food"></cartcontrol>
+                <!--手动$emit派发了add事件，在组件上绑定，就可以给父组件传递事件对象-->
+                <cartcontrol :food="food" @add="addFood"></cartcontrol>
               </div>
             </li>
           </ul>
@@ -51,7 +52,7 @@
     </div>
     <!--购物车组件,需要传入seller配送费和起送价,传入被选择的食物-->
     <shopcart :sendFee="seller.deliveryPrice" :minPrice="seller.minPrice"
-              :selectFoods="selectFoods"></shopcart>
+              :selectFoods="selectFoods" ref="shopcart"></shopcart>
   </div>
 </template>
 
@@ -162,6 +163,17 @@
         let menuList = this.$refs.menuList;
         let el = menuList[index];
         this.menuScroll.scrollToElement(el, 300, 0, -100);  //相对于目标元素的纵轴偏移量
+      },
+      //加减购物车增加食物事件调用对应的小球动画方法
+      addFood(target) {
+        this._drop(target);
+      },
+      //由父组件goods，调用子组件的动画方法
+      _drop(target) {
+        //体验优化，异步执行下落动画
+        this.$nextTick(() => {
+          this.$refs.shopcart.drop(target);
+        });
       }
     }
   }

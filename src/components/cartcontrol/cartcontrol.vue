@@ -30,6 +30,7 @@
         } else {
           this.food.count++;   //增加数量
         }
+        this.$emit('add', event.target);  //给当前实例派发事件，附加dom事件对象传给监听器回调
       },
       deFood() {
         this.food.count--;
@@ -51,11 +52,11 @@
         font-size: 24px;
         line-height: 24px;
         color: rgb(0, 160, 220);
-        transition: all 0.4s linear;
+        transition: all 0.3s linear;
         transform: rotate(0);
       }
       &.move-enter-active, &.move-leave-active {
-        transition: all 0.4s linear; //定义过渡过程的时间
+        transition: all 0.3s linear; //定义过渡过程的时间
       }
       &.move-enter, &.move-leave-to {
         opacity: 0;
