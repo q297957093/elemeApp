@@ -1,67 +1,69 @@
 <template>
-  <!--购物车部分-->
   <div class="shopcart">
-    <div class="content">
-      <!--左侧内容-->
-      <div class="content-left" @click="toggleList">
-        <!--购物车图标-->
-        <div class="logo">
-          <!--商品数量大于0时，添加高亮样式类名-->
-          <i class="icon-shopping_cart" :class="{'highlight':totalCount>0}"></i>
-          <!--购物车商品数量-->
-          <div class="num" v-show="totalCount>0">{{totalCount}}</div>
-        </div>
-        <div class="price" :class="{'highlight':totalPrice>0}">￥{{totalPrice}}</div>
-        <!--配送费-->
-        <div class="send-fee">另需配送费￥{{sendFee}}元</div>
-      </div>
-      <!--右侧内容-->
-      <div class="content-right" @click="pay">
-        <!--结算按钮-->
-        <div class="pay" :class="{'enough':totalPrice>=minPrice}">{{payDesc}}</div>
-      </div>
-    </div>
-    <!--小球动画-->
-    <div class="ball-container">
-      <div v-for="ball in balls">
-        <!--给transition注册事件钩子-->
-        <transition name="drop" @before-enter="beforeDrop" @enter="dropping"
-                    @after-enter="afterDrop">
-          <!--外层元素实现y方向动画-->
-          <div class="ball" v-show="ball.show">
-            <!--内层元素实现x方向动画，类名inner-hook仅为了js选择dom-->
-            <div class="inner inner-hook"></div>
+    <!--购物车部分-->
+    <div class="shopcart">
+      <div class="content">
+        <!--左侧内容-->
+        <div class="content-left" @click="toggleList">
+          <!--购物车图标-->
+          <div class="logo">
+            <!--商品数量大于0时，添加高亮样式类名-->
+            <i class="icon-shopping_cart" :class="{'highlight':totalCount>0}"></i>
+            <!--购物车商品数量-->
+            <div class="num" v-show="totalCount>0">{{totalCount}}</div>
           </div>
-        </transition>
+          <div class="price" :class="{'highlight':totalPrice>0}">￥{{totalPrice}}</div>
+          <!--配送费-->
+          <div class="send-fee">另需配送费￥{{sendFee}}元</div>
+        </div>
+        <!--右侧内容-->
+        <div class="content-right" @click="pay">
+          <!--结算按钮-->
+          <div class="pay" :class="{'enough':totalPrice>=minPrice}">{{payDesc}}</div>
+        </div>
       </div>
+      <!--小球动画-->
+      <div class="ball-container">
+        <div v-for="ball in balls">
+          <!--给transition注册事件钩子-->
+          <transition name="drop" @before-enter="beforeDrop" @enter="dropping"
+                      @after-enter="afterDrop">
+            <!--外层元素实现y方向动画-->
+            <div class="ball" v-show="ball.show">
+              <!--内层元素实现x方向动画，类名inner-hook仅为了js选择dom-->
+              <div class="inner inner-hook"></div>
+            </div>
+          </transition>
+        </div>
+      </div>
+      <!--购物车详情列表,添加上拉动画-->
+      <transition name="fold">
+        <div class="shopcart-list" v-show="listShow">
+          <div class="list-header">
+            <span class="title">购物车</span>
+            <span class="empty" @click="empty">清空</span>
+          </div>
+          <div class="list-content" ref="listContent">
+            <ul>
+              <li v-for="food in selectFoods" class="food">
+                <span class="name">{{food.name}}</span>
+                <div class="price">
+                  <span>￥{{food.price*food.count}}</span>
+                </div>
+                <div class="cartcontrol-wrapper">
+                  <cartcontrol @add="addFood" :food="food"></cartcontrol>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </transition>
     </div>
-    <!--购物车详情列表,添加上拉动画-->
-    <transition name="fold">
-      <div class="shopcart-list" v-show="listShow">
-        <div class="list-header">
-          <span class="title">购物车</span>
-          <span class="empty" @click="empty">清空</span>
-        </div>
-        <div class="list-content" ref="listContent">
-          <ul>
-            <li v-for="food in selectFoods" class="food">
-              <span class="name">{{food.name}}</span>
-              <div class="price">
-                <span>￥{{food.price*food.count}}</span>
-              </div>
-              <div class="cartcontrol-wrapper">
-                <cartcontrol @add="addFood" :food="food"></cartcontrol>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+    <!--背景蒙层,添加浮现动画-->
+    <transition name="fade">
+      <div class="list-mask" @click="hideList" v-show="listShow"></div>
     </transition>
   </div>
-  <!--背景蒙层,添加浮现动画-->
-  <!--<transition name="fade">-->
-  <!--<div class="list-mask" @click="hideList" v-show="listShow"></div>-->
-  <!--</transition>-->
 </template>
 
 <script>
@@ -431,7 +433,7 @@
     height: 100%;
     z-index: 40;
     background-color: rgba(7, 17, 27, .6);
-    filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); //背景玻璃模糊
     opacity: 1;
     &.fade-enter-active, &.fade-leave-active {
       transition: all 0.5s;

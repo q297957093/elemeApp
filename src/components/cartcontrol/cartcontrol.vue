@@ -3,14 +3,14 @@
     <!--添加过渡动画，向左滚动-->
     <transition name="move">
       <!--减少按钮-->
-      <div v-show="food.count>0" class="decrease" @click="deFood">
+      <div v-show="food.count>0" class="decrease" @click.stop.prevent="deFood">
         <span class="inner icon-remove_circle_outline"></span>
       </div>
     </transition>
     <!--商品数量-->
     <div v-show="food.count>0" class="count">{{food.count}}</div>
-    <!--增加按钮-->
-    <div class="add icon-add_circle" @click="addFood"></div>
+    <!--增加按钮,点击事件后跟.stop.prevent防止事件冒泡，避免触发食物详情的点击事件-->
+    <div class="add icon-add_circle" @click.stop.prevent="addFood"></div>
   </div>
 </template>
 

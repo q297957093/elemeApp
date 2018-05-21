@@ -1,58 +1,63 @@
 <template>
-  <div class="goods">
-    <!--左侧菜单-->
-    <div class="menu-wrapper border-1px" ref="menuWrapper">
-      <ul>
-        <li v-for="(item,index) in goods" class="menu-item" ref="menuList"
-            :class="{'current':currentIndex===index}" @click="selectMenu(index)">
+  <div>
+    <!--goods组件-->
+    <div class="goods">
+      <!--左侧菜单-->
+      <div class="menu-wrapper border-1px" ref="menuWrapper">
+        <ul>
+          <li v-for="(item,index) in goods" class="menu-item" ref="menuList"
+              :class="{'current':currentIndex===index}" @click="selectMenu(index)">
           <span class="text">
             <span v-if="item.type>0" class="icon" :class="classMap[item.type]"></span>{{item.name}}
           </span>
-        </li>
-      </ul>
-    </div>
-    <!--食物内容-->
-    <div class="foods-wrapper" ref="foodsWrapper">
-      <ul>
-        <!--菜品分类-->
-        <li v-for="item in goods" class="food-item" ref="foodList">
-          <!--分类标题-->
-          <h1 class="title">{{item.name}}</h1>
-          <ul>
-            <!--分类内的食物列表-->
-            <li v-for="food in item.foods" class="foods">
-              <!--食物图片-->
-              <div class="icon">
-                <img :src="food.icon" width="57" height="57">
-              </div>
-              <!--食物详情-->
-              <div class="content">
-                <!--食物名称-->
-                <h2 class="food-name">{{food.name}}</h2>
-                <!--介绍-->
-                <p class="description">{{food.description}}</p>
-                <!--月售和好评-->
-                <div class="extra">
-                  <span class="count">月售{{food.sellCount}}份</span><span>好评率{{food.rating}}%</span>
+          </li>
+        </ul>
+      </div>
+      <!--食物内容-->
+      <div class="foods-wrapper" ref="foodsWrapper">
+        <ul>
+          <!--菜品分类-->
+          <li v-for="item in goods" class="food-item" ref="foodList">
+            <!--分类标题-->
+            <h1 class="title">{{item.name}}</h1>
+            <ul>
+              <!--分类内的食物列表,绑定选择进入food详情页-->
+              <li @click="selectFood(food,$event)" v-for="food in item.foods" class="foods border-1px">
+                <!--食物图片-->
+                <div class="icon">
+                  <img :src="food.icon" width="57" height="57">
                 </div>
-                <!--价格-->
-                <div class="price">
-                  <span class="now-price">￥{{food.price}}</span><span v-if="food.oldPrice" class="old-price">￥{{food.oldPrice}}</span>
+                <!--食物详情-->
+                <div class="content">
+                  <!--食物名称-->
+                  <h2 class="food-name">{{food.name}}</h2>
+                  <!--介绍-->
+                  <p class="description">{{food.description}}</p>
+                  <!--月售和好评-->
+                  <div class="extra">
+                    <span class="count">月售{{food.sellCount}}份</span><span>好评率{{food.rating}}%</span>
+                  </div>
+                  <!--价格-->
+                  <div class="price">
+                    <span class="now-price">￥{{food.price}}</span><span v-if="food.oldPrice" class="old-price">￥{{food.oldPrice}}</span>
+                  </div>
                 </div>
-              </div>
-              <!--加减商品组件-->
-              <div class="cartcontrol-wrapper">
-                <!--手动$emit派发了add事件，在组件上绑定，就可以给父组件传递事件对象-->
-                <cartcontrol :food="food" @add="addFood"></cartcontrol>
-              </div>
-            </li>
-          </ul>
-        </li>
-      </ul>
+                <!--加减商品组件-->
+                <div class="cartcontrol-wrapper">
+                  <!--手动$emit派发了add事件，在组件上绑定，就可以给父组件传递事件对象-->
+                  <cartcontrol :food="food" @add="addFood"></cartcontrol>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <!--购物车组件,需要传入seller配送费和起送价,传入被选择的食物-->
+      <shopcart :sendFee="seller.deliveryPrice" :minPrice="seller.minPrice"
+                :selectFoods="selectFoods" ref="shopcart"></shopcart>
     </div>
-    <!--购物车组件,需要传入seller配送费和起送价,传入被选择的食物-->
-    <shopcart :sendFee="seller.deliveryPrice" :minPrice="seller.minPrice"
-              :selectFoods="selectFoods" ref="shopcart"></shopcart>
+    <!--food组件-->
+    <food @add="addFood" :food="selectedFood" ref="food"></food>
   </div>
 </template>
 
@@ -60,12 +65,14 @@
   import BScroll from 'better-scroll';   //引入better-scroll滚动条插件
   import shopcart from '../shopcart/shopcart';  //引入购物车组件
   import cartcontrol from '../cartcontrol/cartcontrol';  //引入加减商品组件
+  import food from '../food/food' //引入食物详情组件
 
   const ERR_OK = 0;  //初始化错误码常量
   export default {
     components: {
       shopcart,  //注册购物车组件
-      cartcontrol  //注册加减商品组件
+      cartcontrol,  //注册加减商品组件
+      food //注册食物详情组件
     },
     props: {
       seller: {
@@ -76,7 +83,8 @@
       return {
         goods: [],   //获取数据
         listHeight: [],  //右侧食物列表高度数组
-        scrollY: 0  //右侧滚动条Y轴位置
+        scrollY: 0,  //右侧滚动条Y轴位置
+        selectedFood: {}  //选中的食物，给food详情组件传递数据
       }
     },
     computed: {
@@ -174,6 +182,11 @@
         this.$nextTick(() => {
           this.$refs.shopcart.drop(target);
         });
+      },
+      //选择食物，进入food详情组件，并将数据传入
+      selectFood(food,event) {
+        this.selectedFood = food;  //传递数据
+        this.$refs.food.show();  //调用子组件food内的show方法
       }
     }
   }

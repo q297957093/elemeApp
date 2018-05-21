@@ -11,7 +11,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      component: goods
+      redirect: '/goods'   //重定向，默认为goods路由
     },
     {
       path: '/goods',
