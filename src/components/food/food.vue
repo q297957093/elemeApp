@@ -81,6 +81,7 @@
   import Vue from 'vue';  //引入Vue
   import split from '../split/split';  //引入分割样式组件
   import ratingselect from '../ratingselect/ratingselect';  //引入商品评价组件
+  import {formatDate} from "../../common/js/date";  //引入date.js内的方法
 
   const ALL = 2;
   export default {
@@ -161,6 +162,13 @@
         } else {
           return this.selectType === type;  //最后，只有选择类型和当前评价类型相等时才显示
         }
+      }
+    },
+    //定义组件本地过滤器
+    filters: {
+      formatDate(time) {
+        let date = new Date(time); //将时间戳转化为时间对象
+        return formatDate(date,'yyyy-MM-dd hh:mm');  //调用formatDate方法，传入时间和格式字符串
       }
     }
   };
@@ -337,7 +345,7 @@
       .no-rating {
         padding: 16px 0;
         font-size: 12px;
-        color: rgb(147,153,159);
+        color: rgb(147, 153, 159);
         text-align: center;
       }
     }
