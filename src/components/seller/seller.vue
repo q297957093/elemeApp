@@ -38,10 +38,47 @@
           </li>
         </ul>
         <!--收藏按钮-->
-        <div class="favourite"></div>
+        <div class="favorite" @click="toggleFavorite">
+          <i class="icon-favorite" :class="{'active':favorite}"></i>
+          <span class="text">{{favoriteText}}</span>
+        </div>
       </div>
       <!--间隔条组件-->
       <split></split>
+      <!--公告与活动-->
+      <div class="bulletin">
+        <div class="title">公告与活动</div>
+        <div class="content border-1px">{{seller.bulletin}}</div>
+        <!--活动列表-->
+        <ul v-if="seller.supports" class="supports">
+          <li v-for="(support,index) in seller.supports" class="support-item border-1px">
+            <span class="icon" :class="classMap[seller.supports[index].type]"></span>
+            <span class="text">{{seller.supports[index].description}}</span>
+          </li>
+        </ul>
+      </div>
+      <!--间隔条组件-->
+      <split></split>
+      <!--商家实景-->
+      <div class="photos">
+        <h1 class="title">商家实景</h1>
+        <div class="photos-wrapper" ref="photosWrapper">
+          <ul ref="photoList">
+            <li v-for="pic in seller.pics" class="photo-item">
+              <img :src="pic" width="120" height="90">
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!--间隔条组件-->
+      <split></split>
+      <!--商家信息-->
+      <div class="info">
+        <h1 class="title border-1px">商家信息</h1>
+        <ul>
+          <li v-for="info in seller.infos" class="info-item border-1px">{{info}}</li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +87,7 @@
   import BScroll from 'better-scroll'; //引入滚动插件
   import star from '../star/star';  //引入星星组件
   import split from '../split/split';  //引入间隔条组件
+  import {saveToLocal, loadFromLocal} from "../../common/js/store"; //引入本地存储和读取数据方法
 
   export default {
     components: {
@@ -59,6 +97,70 @@
     props: {
       seller: {
         type: Object
+      }
+    },
+    data() {
+      return {
+        //立即执行函数
+        favorite: (() => {
+          //根据商家id读取本地缓存的收藏与否数据
+          return loadFromLocal(this.seller.id, 'favorite', false);
+        })()
+      }
+    },
+    computed: {
+      //收藏文本的计算属性
+      favoriteText() {
+        return this.favorite ? '已收藏' : '收藏';  //根据爱心点亮与否来展示不同文本
+      }
+    },
+    created() {
+      this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
+    },
+    //另一个生命周期钩子,dom被新创建的替换，并挂载到实例上去之后调用该钩子
+    mounted() {
+      this.$nextTick(() => {
+        this._initScroll();
+        this._initPics();
+      });
+    },
+    methods: {
+      //初始化滚动插件
+      _initScroll() {
+        if (!this.scroll) {
+          this.scroll = new BScroll(this.$refs.seller, {
+            click: true
+          });
+        } else {
+          this.scroll.refresh();
+        }
+      },
+      //初始化商家实景图滚动
+      _initPics() {
+        if (this.seller.pics) {
+          let picWidth = 120;  //定义图片宽度
+          let margin = 6;  //定义外边距
+          //计算出所有实景图的宽度，注意要减去最后一幅图的margin
+          let width = (picWidth + margin) * this.seller.pics.length - margin;
+          //给ul的宽度赋值为所有实景图的宽度
+          this.$refs.photoList.style.width = width + 'px';
+          this.$nextTick(() => {
+            if (!this.picScroll) {
+              this.picScroll = new BScroll(this.$refs.photosWrapper, {
+                scrollX: true,  //横向滚动
+                eventPassthrough: 'vertical'  //忽略外层的竖向滚动
+              });
+            } else {
+              this.picScroll.refresh();
+            }
+          });
+        }
+      },
+      //收藏按钮
+      toggleFavorite() {
+        this.favorite = !this.favorite;
+        //将商家的id，收藏与否的键值对数据保存到本地
+        saveToLocal(this.seller.id, 'favorite', this.favorite);
       }
     }
   }
@@ -105,25 +207,151 @@
           flex: 1;
           text-align: center;
           border-right: 1px solid rgba(7, 17, 27, .1);
-          &:last-child{
+          &:last-child {
             border: none;
           }
-          h2{
+          h2 {
             margin-bottom: 4px;
             font-size: 10px;
             line-height: 10px;
-            color: rgb(147,153,159);
+            color: rgb(147, 153, 159);
           }
-          .value{
+          .value {
             font-size: 10px;
             font-weight: 200;
-            color: rgb(7,17,27);
+            color: rgb(7, 17, 27);
             line-height: 24px;
-            .stress{
+            .stress {
               font-size: 24px;
               font-weight: 200;
             }
           }
+        }
+      }
+      .favorite {
+        position: absolute;
+        top: 18px;
+        right: 11px;
+        width: 50px;
+        text-align: center;
+        .icon-favorite {
+          display: block;
+          margin-bottom: 4px;
+          font-size: 24px;
+          line-height: 24px;
+          color: #d4d6d9;
+          &.active {
+            color: rgb(240, 20, 20);
+          }
+        }
+        .text {
+          font-size: 10px;
+          line-height: 10px;
+          color: rgb(77, 85, 93);
+        }
+      }
+    }
+    .bulletin {
+      padding: 18px 18px 0 18px;
+      .title {
+        margin-bottom: 8px;
+        font-size: 14px;
+        line-height: 14px;
+        color: rgb(7, 17, 27);
+      }
+      .content {
+        padding: 0 12px 16px 12px;
+        font-size: 12px;
+        line-height: 24px;
+        font-weight: 200;
+        text-align: justify;
+        color: rgb(240, 20, 20);
+        @include border-1px(rgba(7, 17, 27, .1));
+      }
+      .supports {
+        .support-item {
+          padding: 16px 12px;
+          font-size: 0;
+          @include border-1px(rgba(7, 17, 27, .1));
+          &:last-child {
+            @include border-none();
+          }
+          .icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            vertical-align: top;
+            margin-right: 6px;
+            background-size: 16px 16px;
+            background-repeat: no-repeat;
+            &.decrease {
+              @include bg-image('decrease_4');
+            }
+            &.discount {
+              @include bg-image('discount_4');
+            }
+            &.guarantee {
+              @include bg-image('guarantee_4');
+            }
+            &.invoice {
+              @include bg-image('invoice_4');
+            }
+            &.special {
+              @include bg-image('special_4');
+            }
+          }
+          .text {
+            font-size: 12px;
+            font-weight: 200;
+            line-height: 16px;
+            color: rgb(7, 17, 27);
+          }
+        }
+      }
+    }
+    .photos {
+      padding: 18px;
+      .title {
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 14px;
+        color: rgb(7, 17, 27);
+      }
+      .photos-wrapper {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap; //规定段落中的内容不进行换行
+        ul {
+          font-size: 0;
+          .photo-item {
+            display: inline-block;
+            margin-right: 6px;
+            width: 120px;
+            height: 90px;
+            &:last-child {
+              margin: 0;
+            }
+          }
+        }
+      }
+    }
+    .info {
+      padding: 18px 18px 0 18px;
+      color: rgb(7, 17, 27);
+      .title {
+        padding-bottom: 12px;
+        font-size: 14px;
+        line-height: 14px;
+        @include border-1px(rgba(7, 17, 27, .1));
+      }
+      .info-item {
+        padding: 16px 12px;
+        font-size: 12px;
+        font-weight: 200;
+        line-height: 16px;
+        @include border-1px(rgba(7, 17, 27, .1));
+        &:last-child {
+          @include border-none();
         }
       }
     }

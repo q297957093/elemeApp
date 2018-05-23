@@ -39,7 +39,7 @@
       <div class="ratings-wrapper">
         <ul>
           <li v-for="rating in ratings" v-show="needShow(rating.rateType, rating.text)"
-              class="rating-item">
+              class="rating-item border-1px">
             <!--用户头像-->
             <div class="avatar">
               <img :src="rating.avatar" width="28" height="28">
@@ -240,6 +240,9 @@
         display: flex;
         padding: 18px 0;
         @include border-1px(rgba(7, 17, 27, .1));
+        &:last-child {
+          @include border-none();
+        }
         .avatar {
           flex: 0 0 28px;
           width: 28px;
